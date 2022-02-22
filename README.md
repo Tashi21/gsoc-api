@@ -10,16 +10,16 @@ This is a template .env file with all the key names being used in the project. P
 
 ### 1. /orgs
 
-    A GET request to get all the organizations.
+A GET request to get all the organizations.
 
 ### 2. /orgs/{org_name}
 
-    A GET request to get the details of a particular organization.
+A GET request to get the details of a particular organization.
 
 ### 3. /orgs/{org_name}
 
-    A PATCH request to edit a particular organization.
+A PATCH request to edit a particular organization.
 
 ### 4. /orgs/{org_name}
 
-    A DELETE request to delete a particular organization.
+A DELETE request to delete a particular organization.
