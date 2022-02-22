@@ -1,4 +1,4 @@
-module gsoc-rest-api
+module gsoc-api
 
 go 1.17
 
