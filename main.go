@@ -1,3 +1,8 @@
+// TODO: Add Caching
+// TODO: Add GET route for individual organizations
+// TODO: Add PATCH route for individual organizations
+// TODO: Add DELETE route for individual organizations
+
 package main
 
 import (
