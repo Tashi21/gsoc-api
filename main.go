@@ -1,7 +1,5 @@
 // TODO: Add Caching
-// TODO: Add GET route for individual organizations
 // TODO: Add PATCH route for individual organizations
-// TODO: Add DELETE route for individual organizations
 
 package main
 
@@ -19,19 +17,25 @@ import (
 )
 
 type Organization struct {
-	Id        uuid.UUID  `json:"id"`
-	Name      string     `json:"name"`
-	Year      int        `json:"year"`
-	Link      *string    `json:"link"`
-	Website   *string    `json:"website"`
-	CreatedAt *time.Time `json:"created_at"`
+	Id        uuid.UUID  `json:"id,omitempty"`
+	Name      string     `json:"name,omitempty"`
+	Year      int        `json:"year,omitempty"`
+	TechStack *string    `json:"tech_stack,omitempty"`
+	Topics    *string    `json:"topics,omitempty"`
+	ShortDesc *string    `json:"short_desc,omitempty"`
+	Link      *string    `json:"link,omitempty"`
+	ImgUrl    *string    `json:"img_url,omitempty"`
+	Website   *string    `json:"website,omitempty"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 }
 
 type JsonResponse struct {
-	Type    string         `json:"type"`
-	Message string         `json:"message"`
-	Count   int            `json:"count"`
-	Data    []Organization `json:"data"`
+	Type    string         `json:"type,omitempty"`
+	Message string         `json:"message,omitempty"`
+	Count   int            `json:"count,omitempty"`
+	Data    []Organization `json:"data,omitempty"`
 }
 
 func getEnv(key string) string {
