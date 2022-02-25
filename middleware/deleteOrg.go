@@ -16,6 +16,7 @@ func DeleteOrg(w http.ResponseWriter, r *http.Request) {
 	// variables
 	var id uuid.UUID
 	var err error
+	var flag int = 0
 
 	// database setup
 	db := SetupDB()
@@ -32,7 +33,11 @@ func DeleteOrg(w http.ResponseWriter, r *http.Request) {
 
 	// delete the organization
 	_, err = db.Exec(fmt.Sprintf("DELETE FROM organizations WHERE id = '%s'", id))
-	CheckErr(err)
+	flag = internalError(w, err, "Error deleting organization.")
+
+	if flag == -1 {
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(models.JsonResponse{Type: "success", Message: "Organization deleted."})

@@ -12,6 +12,7 @@ func Router() (*mux.Router, *http.Server) {
 	r := mux.NewRouter()
 	r.HandleFunc("/orgs", middleware.GetOrgs).Methods("GET")
 	r.HandleFunc("/orgs/{id}", middleware.GetOrg).Methods("GET")
+	r.HandleFunc("/orgs/{id}", middleware.PutOrg).Methods("PUT")
 	r.HandleFunc("/orgs/{id}", middleware.DeleteOrg).Methods("DELETE")
 
 	server := &http.Server{

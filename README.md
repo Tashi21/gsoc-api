@@ -18,4 +18,8 @@ A GET request to get all the details of a particular organization.
 
 ### 3. /orgs/{id}
 
+A PUT request to update a particular organization.
+
+### 4. /orgs/{id}
+
 A DELETE request to delete a particular organization.
