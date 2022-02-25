@@ -1,17 +1,16 @@
-// function to delete an organization
-package main
+package middleware
 
 import (
 	"encoding/json"
 	"fmt"
+	"gsoc-api/models"
 	"net/http"
 
-	"github.com/gorilla/mux"
-
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
-func deleteOrg(w http.ResponseWriter, r *http.Request) {
+func DeleteOrg(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// variables
@@ -19,7 +18,7 @@ func deleteOrg(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	// database setup
-	db := setupDB()
+	db := SetupDB()
 	defer db.Close()
 
 	// get the id from the url
@@ -27,14 +26,14 @@ func deleteOrg(w http.ResponseWriter, r *http.Request) {
 	id, err = uuid.Parse(vars["id"])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(JsonResponse{Type: "error", Message: "Invalid ID."})
+		json.NewEncoder(w).Encode(models.JsonResponse{Type: "error", Message: "Invalid ID."})
 		return
 	}
 
 	// delete the organization
 	_, err = db.Exec(fmt.Sprintf("DELETE FROM organizations WHERE id = '%s'", id))
-	checkErr(err)
+	CheckErr(err)
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(JsonResponse{Type: "success", Message: "Organization deleted."})
+	json.NewEncoder(w).Encode(models.JsonResponse{Type: "success", Message: "Organization deleted."})
 }
