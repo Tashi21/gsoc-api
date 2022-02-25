@@ -18,8 +18,4 @@ A GET request to get all the details of a particular organization.
 
 ### 3. /orgs/{id}
 
-A PATCH request to edit a particular organization.
-
-### 4. /orgs/{id}
-
 A DELETE request to delete a particular organization.

@@ -1,5 +1,4 @@
 // TODO: Add Caching
-// TODO: Add PATCH route for individual organizations
 
 package main
 
@@ -38,6 +37,12 @@ type JsonResponse struct {
 	Data    []Organization `json:"data,omitempty"`
 }
 
+func checkErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func getEnv(key string) string {
 	// set config file path
 	viper.SetConfigFile(".env")
@@ -61,20 +66,18 @@ func setupDB() *sql.DB {
 	connectionString := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable connect_timeout=15", getEnv("DB_USER"), getEnv("DB_PASSWORD"), getEnv("DB_NAME"), getEnv("HOST"), getEnv("DB_PORT"))
 	db, err := sql.Open(getEnv("DATABASE"), connectionString)
 	checkErr(err)
-	return db
-}
 
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
-	}
+	// ping the database
+	err = db.Ping()
+	checkErr(err)
+
+	return db
 }
 
 func router() (*mux.Router, *http.Server) {
 	r := mux.NewRouter()
 	r.HandleFunc("/orgs", getOrgs).Methods("GET")
 	r.HandleFunc("/orgs/{id}", getOrg).Methods("GET")
-	r.HandleFunc("/orgs/{id}", patchOrg).Methods("PATCH")
 	r.HandleFunc("/orgs/{id}", deleteOrg).Methods("DELETE")
 
 	server := &http.Server{
