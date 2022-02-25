@@ -1,9 +1,9 @@
 // TODO: Add Caching
-// TODO: Add params?
 // TODO: Add GET route for individual organizations
 // TODO: Add PATCH route for individual organizations
 // TODO: Add DELETE route for individual organizations
 // TODO: Add POST route for individual organizations
+// TODO: Add params for all the above endpoints
 
 package main
 
@@ -25,15 +25,9 @@ type Organization struct {
 	Id        uuid.UUID  `json:"id"`
 	Name      string     `json:"name"`
 	Year      int        `json:"year"`
-	TechStack *string    `json:"tech_stack"`
-	Topics    *string    `json:"topics"`
-	ShortDesc *string    `json:"short_desc"`
 	Link      *string    `json:"link"`
-	ImgUrl    *string    `json:"img_url"`
 	Website   *string    `json:"website"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at"`
+	CreatedAt *time.Time `json:"created_at"`
 }
 
 type JsonResponse struct {
@@ -76,44 +70,68 @@ func checkErr(err error) {
 }
 
 func getOrgs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	// variables
 	var orgs []Organization
-	var response []byte
+	var data *sql.Rows
+	var err error
 
 	// database setup
 	db := setupDB()
 	defer db.Close()
 
-	// getting all organizations
-	data, err := db.Query("SELECT * FROM organizations")
-	checkErr(err)
+	params := r.URL.Query()
+	n := params.Get("name")
+	y := params.Get("year")
+
+	checkParams := r.URL.Query()
+	checkParams.Del("name")
+	checkParams.Del("year")
+
+	if len(checkParams) > 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(JsonResponse{Type: "error", Message: "Invalid parameters.", Count: 0, Data: []Organization{}})
+		return
+	}
+
+	if n != "" && y != "" {
+		data, err = db.Query(fmt.Sprintf("SELECT id, name, year, link, website, created_at FROM organizations WHERE name LIKE '%%%s%%' AND year = %s", n, y))
+		checkErr(err)
+	} else if n != "" {
+		// getting all organizations with name contaning given letters
+		data, err = db.Query(fmt.Sprintf("SELECT id, name, year, link, website, created_at FROM organizations WHERE name LIKE '%%%s%%'", n))
+		checkErr(err)
+	} else if y != "" {
+		// getting all organizations for a specific year
+		data, err = db.Query(fmt.Sprintf("SELECT id, name, year, link, website, created_at FROM organizations WHERE year = %s", y))
+		checkErr(err)
+	} else {
+		data, err = db.Query("SELECT id, name, year, link, website, created_at FROM organizations")
+		checkErr(err)
+	}
 
 	// looping through all organizations and storing them in an array
 	for data.Next() {
 		// variables for each column
-		var name string
-		var techStack, topics, shortDesc, link, imgUrl, website *string
-		var year int
 		var id uuid.UUID
-		var createdAt, updatedAt time.Time
-		var deletedAt *time.Time
+		var name string
+		var year int
+		var link, website *string
+		var createdAt *time.Time
 
 		// copying data from each row to the corresponding variables
-		err = data.Scan(&id, &name, &year, &techStack, &topics, &shortDesc, &link, &imgUrl, &website, &createdAt, &updatedAt, &deletedAt)
+		err = data.Scan(&id, &name, &year, &link, &website, &createdAt)
 		checkErr(err)
 
 		// appending the data to the array
-		orgs = append(orgs, Organization{Id: id, Name: name, Year: year, TechStack: techStack, Topics: topics, ShortDesc: shortDesc, Link: link, ImgUrl: imgUrl, Website: website})
+		// orgs = append(orgs, Organization{Id: id, Name: name, Year: year, TechStack: techStack, Topics: topics, ShortDesc: shortDesc, Link: link, ImgUrl: imgUrl, Website: website})
+		orgs = append(orgs, Organization{Id: id, Name: name, Year: year, Link: link, Website: website, CreatedAt: createdAt})
 	}
 
-	// converting the array to json
-	response, err = json.Marshal(JsonResponse{Type: "success", Message: "Organizations retrieved successfully.", Count: len(orgs), Data: orgs})
-	checkErr(err)
-
 	// writing the json to the response
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(response)
+	json.NewEncoder(w).Encode(JsonResponse{Type: "success", Message: "Organizations retrieved successfully.", Count: len(orgs), Data: orgs})
 }
 
 func router() (*mux.Router, *http.Server) {
